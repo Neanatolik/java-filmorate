@@ -14,7 +14,7 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
 
-    private final static Logger log = LoggerFactory.getLogger(UserController.class);
+    private static  final Logger log = LoggerFactory.getLogger(UserController.class);
     private Map<Integer, User> users = new HashMap<>();
 
     @PostMapping("/users")
