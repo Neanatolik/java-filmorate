@@ -13,8 +13,8 @@ import java.util.Map;
 
 @RestController
 public class FilmController {
-    private final static LocalDate localDate = LocalDate.of(1895, Month.DECEMBER, 28);
-    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
+    private static final LocalDate localDate = LocalDate.of(1895, Month.DECEMBER, 28);
+    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
     private Map<Integer, Film> films = new HashMap<>();
 
     @PostMapping("/films")
