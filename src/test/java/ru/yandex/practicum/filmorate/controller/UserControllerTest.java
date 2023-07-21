@@ -16,7 +16,6 @@ class UserControllerTest {
     static User user1;
     static User user2;
     static User user3;
-    static User user4;
 
     @BeforeAll
     public static void beforeAll() {
