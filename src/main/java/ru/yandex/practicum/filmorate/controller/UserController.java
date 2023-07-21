@@ -7,20 +7,20 @@ import ru.yandex.practicum.filmorate.exceptions.FilmorateException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
-@RequestMapping("/users")
 public class UserController {
 
-    private static  final Logger log = LoggerFactory.getLogger(UserController.class);
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private Map<Integer, User> users = new HashMap<>();
+    private int id = 0;
 
     @PostMapping("/users")
     public User addUser(@RequestBody User user) {
-        if (user.getName().isBlank()) user.setName(user.getLogin());
+        if (Objects.isNull(user.getName())) user.setName(user.getLogin());
         if (checkUser(user)) {
+            user.setId(getNextId());
             log.debug(user.toString());
             users.put(user.getId(), user);
         }
@@ -28,17 +28,17 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public void updateUser(@RequestBody User user) {
+    public User updateUser(@RequestBody User user) {
         if (users.containsKey(user.getId())) {
             log.debug(user.toString());
             users.put(user.getId(), user);
-            System.out.println(user);
-        }
+        } else throw new FilmorateException("Нет такого id");
+        return user;
     }
 
     @GetMapping("/users")
-    public Map<Integer, User> getUsers() {
-        return users;
+    public List<User> getUsers() {
+        return new ArrayList<User>(users.values());
     }
 
     private boolean checkUser(User user) {
@@ -47,8 +47,12 @@ public class UserController {
         } else if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw new FilmorateException("Электронная почта не может быть пустой");
         } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw new FilmorateException("Длительность фильма должна быть положительной");
+            throw new FilmorateException("Логин не может быть пустым");
         } else return true;
+    }
+
+    public Integer getNextId() {
+        return ++id;
     }
 
 }
