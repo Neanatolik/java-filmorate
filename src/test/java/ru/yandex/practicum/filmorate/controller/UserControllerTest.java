@@ -20,10 +20,10 @@ class UserControllerTest {
 
     @BeforeAll
     public static void beforeAll() {
-        user1 = new User("1","Login1", "123@", LocalDate.of(1994, Month.SEPTEMBER, 9));
-        user2 = new User("2","Login1", "123", LocalDate.of(1994, Month.SEPTEMBER, 9));
-        user3 = new User("3","Login1", "123@", LocalDate.of(2994, Month.SEPTEMBER, 9));
-        user4 = new User("Nick Name","dolore", "mail@mail.ru", LocalDate.of(1946, Month.AUGUST, 20));
+        user1 = new User("1", "Login1", "123@", LocalDate.of(1994, Month.SEPTEMBER, 9));
+        user2 = new User("2", "Login1", "123", LocalDate.of(1994, Month.SEPTEMBER, 9));
+        user3 = new User("3", "Login1", "123@", LocalDate.of(2994, Month.SEPTEMBER, 9));
+        user4 = new User("Nick Name", "dolore", "mail@mail.ru", LocalDate.of(1946, Month.AUGUST, 20));
         userC = new UserController();
     }
 
