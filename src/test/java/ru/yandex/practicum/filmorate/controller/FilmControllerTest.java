@@ -12,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FilmControllerTest {
-    static FilmController filmController;
-    static Film film1;
-    static Film film2;
-    static Film film3;
-    static Film film4;
+    private static FilmController filmController;
+    private static Film film1;
+    private static Film film2;
+    private static Film film3;
+    private static Film film4;
 
     @BeforeAll
     public static void beforeAll() {
@@ -33,17 +33,17 @@ class FilmControllerTest {
     }
 
     @Test
-    public void test() {
+    public void testFilmController() {
         assertEquals(film1, filmController.addFilm(film1));
-        final FilmorateException exception = assertThrows(
+        assertThrows(
                 FilmorateException.class,
                 () -> filmController.addFilm(film2)
         );
-        final FilmorateException exception2 = assertThrows(
+        assertThrows(
                 FilmorateException.class,
                 () -> filmController.addFilm(film3)
         );
-        final FilmorateException exception3 = assertThrows(
+        assertThrows(
                 FilmorateException.class,
                 () -> filmController.addFilm(film4)
         );

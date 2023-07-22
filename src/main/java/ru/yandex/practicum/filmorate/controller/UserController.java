@@ -18,7 +18,7 @@ public class UserController {
 
     @PostMapping("/users")
     public User addUser(@RequestBody User user) {
-        if (Objects.isNull(user.getName())) user.setName(user.getLogin());
+        checkUserName(user);
         if (checkUser(user)) {
             user.setId(getNextId());
             log.debug(user.toString());
@@ -27,8 +27,13 @@ public class UserController {
         return user;
     }
 
+    private void checkUserName(User user) {
+        if (Objects.isNull(user.getName())) user.setName(user.getLogin());
+    }
+
     @PutMapping("/users")
     public User updateUser(@RequestBody User user) {
+        checkUserName(user);
         if (users.containsKey(user.getId())) {
             log.debug(user.toString());
             users.put(user.getId(), user);
@@ -51,7 +56,7 @@ public class UserController {
         } else return true;
     }
 
-    public Integer getNextId() {
+    private Integer getNextId() {
         return ++id;
     }
 

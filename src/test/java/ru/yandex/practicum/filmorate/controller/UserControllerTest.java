@@ -12,30 +12,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class UserControllerTest {
-    static UserController userC;
-    static User user1;
-    static User user2;
-    static User user3;
-    static User user4;
+    private static UserController userC;
+    private static User user1;
+    private static User user2;
+    private static User user3;
+    private static User user4;
 
     @BeforeAll
     public static void beforeAll() {
-        user1 = new User("Login1", "123@", LocalDate.of(1994, Month.SEPTEMBER, 9));
-        user2 = new User("Login1", "123", LocalDate.of(1994, Month.SEPTEMBER, 9));
-        user3 = new User("Login1", "123@", LocalDate.of(2994, Month.SEPTEMBER, 9));
-        user4 = new User("dolore", "mail@mail.ru", LocalDate.of(1946, Month.AUGUST, 20));
+        user1 = new User("1","Login1", "123@", LocalDate.of(1994, Month.SEPTEMBER, 9));
+        user2 = new User("2","Login1", "123", LocalDate.of(1994, Month.SEPTEMBER, 9));
+        user3 = new User("3","Login1", "123@", LocalDate.of(2994, Month.SEPTEMBER, 9));
+        user4 = new User("Nick Name","dolore", "mail@mail.ru", LocalDate.of(1946, Month.AUGUST, 20));
         userC = new UserController();
     }
 
     @Test
-    public void test() {
+    public void testUserController() {
         assertEquals(user1, userC.addUser(user1));
         assertEquals(user4, userC.addUser(user4));
-        final FilmorateException exception = assertThrows(
+        assertThrows(
                 FilmorateException.class,
                 () -> userC.addUser(user2)
         );
-        final FilmorateException exception2 = assertThrows(
+        assertThrows(
                 FilmorateException.class,
                 () -> userC.addUser(user3)
         );
