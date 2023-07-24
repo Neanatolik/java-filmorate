@@ -28,10 +28,6 @@ public class UserController {
         return user;
     }
 
-    private void checkUserName(User user) {
-        if (Objects.isNull(user.getName())) user.setName(user.getLogin());
-    }
-
     @PutMapping("/users")
     public User updateUser(@RequestBody User user) {
         checkUserName(user);
@@ -55,6 +51,10 @@ public class UserController {
         } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             throw new FilmorateException("Логин не может быть пустым");
         } else return true;
+    }
+
+    private void checkUserName(User user) {
+        if (Objects.isNull(user.getName())) user.setName(user.getLogin());
     }
 
     private Integer getNextId() {
