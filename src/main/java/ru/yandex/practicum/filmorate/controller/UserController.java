@@ -1,65 +1,64 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.FilmorateException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 
 @RestController
 public class UserController {
 
-    private final UserService userService;
-    private final UserStorage userStorage;
-
-    @Autowired
-    public UserController(InMemoryUserStorage userStorage) {
-        this.userStorage = userStorage;
-        this.userService = new UserService(userStorage);
-    }
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+    private Map<Integer, User> users = new HashMap<>();
+    private int id = 0;
 
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody User user) {
-        return userStorage.addUser(user);
+        checkUserName(user);
+        if (checkUser(user)) {
+            user.setId(getNextId());
+            log.debug(user.toString());
+            users.put(user.getId(), user);
+        }
+        return user;
     }
 
     @PutMapping("/users")
     public User updateUser(@RequestBody User user) {
-        return userStorage.updateUser(user);
-    }
-
-    @PutMapping("/users/{id}/friends/{friendId}")
-    public void putFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.addFriend(friendId, id);
-    }
-
-    @DeleteMapping("/users/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable Long friendId, @PathVariable Long id) {
-        userService.deleteFriend(friendId, id);
+        checkUserName(user);
+        if (users.containsKey(user.getId())) {
+            log.debug(user.toString());
+            users.put(user.getId(), user);
+        } else throw new FilmorateException("Нет такого id");
+        return user;
     }
 
     @GetMapping("/users")
     public List<User> getUsers() {
-        return userStorage.getAllUsers();
+        return new ArrayList<User>(users.values());
     }
 
-    @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userStorage.getUser(id);
+    private boolean checkUser(User user) {
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            throw new FilmorateException("Дата рождения не может быть в будущем");
+        } else if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            throw new FilmorateException("Электронная почта не может быть пустой");
+        } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+            throw new FilmorateException("Логин не может быть пустым");
+        } else return true;
     }
 
-    @GetMapping("/users/{id}/friends")
-    public List<User> getFriends(@PathVariable Long id) {
-        return userService.getFriends(id);
+    private void checkUserName(User user) {
+        if (Objects.isNull(user.getName())) user.setName(user.getLogin());
     }
 
-    @GetMapping("/users/{id}/friends/common/{otherId}")
-    public List<User> getCommon(@PathVariable Long otherId, @PathVariable Long id) {
-        return userService.getCommon(otherId, id);
+    private Integer getNextId() {
+        return ++id;
     }
 
 }

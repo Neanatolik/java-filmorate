@@ -7,12 +7,10 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 public class User {
-    private Long id;
+    private int id;
     private String name;
     @NotBlank
     @NonNull
@@ -23,7 +21,6 @@ public class User {
     @NonNull
     @PastOrPresent
     private LocalDate birthday;
-    private Set<Long> friends = new HashSet<>();
 
     public User(String name, String login, String email, LocalDate birthday) {
         this.name = name;
@@ -34,9 +31,5 @@ public class User {
 
     public void setName(String login) {
         this.name = login;
-    }
-
-    public void addFriend(Long l) {
-        friends.add(l);
     }
 }

@@ -6,12 +6,10 @@ import lombok.NonNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 public class Film {
-    private Long id;
+    private int id;
     @NonNull
     @NotBlank
     private String name;
@@ -23,17 +21,4 @@ public class Film {
     @Positive
     @NonNull
     private int duration;
-    private Set<Long> likes = new HashSet<>();
-
-    public void addLike(Long id) {
-        likes.add(id);
-    }
-
-    public void deleteLike(Long id) {
-        likes.remove(id);
-    }
-
-    public int getAmountOfLikes() {
-        return likes.size();
-    }
 }
