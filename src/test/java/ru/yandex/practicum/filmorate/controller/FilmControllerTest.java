@@ -2,8 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exceptions.FilmorateException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FilmControllerTest {
     private static FilmController filmController;
+    private static final InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
     private static Film film1;
     private static Film film2;
     private static Film film3;
@@ -29,22 +31,22 @@ class FilmControllerTest {
                 "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY" +
                 "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
                 LocalDate.of(1999, Month.JULY, 29), 90);
-        filmController = new FilmController();
+        filmController = new FilmController(filmStorage);
     }
 
     @Test
     public void testFilmController() {
         assertEquals(film1, filmController.addFilm(film1));
         assertThrows(
-                FilmorateException.class,
+                ValidationException.class,
                 () -> filmController.addFilm(film2)
         );
         assertThrows(
-                FilmorateException.class,
+                ValidationException.class,
                 () -> filmController.addFilm(film3)
         );
         assertThrows(
-                FilmorateException.class,
+                ValidationException.class,
                 () -> filmController.addFilm(film4)
         );
     }
