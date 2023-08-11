@@ -10,8 +10,6 @@ public interface UserStorage {
 
     List<User> getAllUsers();
 
-    User updateUser(User user);
-
     User getUser(Long id);
 
     Map<Long, User> getUsers();

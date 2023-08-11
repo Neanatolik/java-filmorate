@@ -11,8 +11,8 @@ import java.time.Month;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTest {
-    private static UserService userS;
     private static final InMemoryUserStorage userStorage = new InMemoryUserStorage();
+    private static UserService userS = new UserService(userStorage);
     private static User user1;
     private static User user4;
 
@@ -25,8 +25,8 @@ class UserServiceTest {
 
     @Test
     public void testUserService() {
-        userStorage.addUser(user1);
-        userStorage.addUser(user4);
+        userS.addUser(user1);
+        userS.addUser(user4);
         userS.addFriend(1L,2L);
         assertEquals(1L, userS.getFriends(2L).get(0).getId());
         userS.deleteFriend(1L,2L);

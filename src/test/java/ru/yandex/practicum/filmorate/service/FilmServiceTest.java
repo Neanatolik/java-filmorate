@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FilmServiceTest {
     private static final InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+    private static final FilmService filmService = new FilmService(filmStorage);
     private static FilmService filmS;
     private static Film film1;
     private static Film film2;
@@ -27,8 +28,8 @@ class FilmServiceTest {
 
     @Test
     public void testUserService() {
-        filmStorage.addFilm(film1);
-        filmStorage.addFilm(film2);
+        filmService.addFilm(film1);
+        filmService.addFilm(film2);
         filmS.addLike(1L, 2L);
         assertEquals(1, film1.getLikes().size());
         filmS.deleteLike(1L, 2L);
