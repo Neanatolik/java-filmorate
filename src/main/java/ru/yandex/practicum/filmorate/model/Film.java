@@ -7,7 +7,7 @@ import lombok.NonNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -24,8 +24,21 @@ public class Film {
     @Positive
     @NonNull
     private int duration;
+    private List<Genre> genres;
+    @NonNull
+    private Mpa mpa;
     @JsonIgnore
-    private Set<Long> likes = new HashSet<>();
+    private Set<Long> likes;
+
+    public Film(String name, String description, LocalDate releaseDate, int duration, Mpa mpa, List<Genre> genres, Set<Long> likes) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+        this.genres = genres;
+        this.likes = likes;
+    }
 
     public void addLike(Long id) {
         likes.add(id);

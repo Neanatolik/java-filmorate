@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.enums.Genres;
+import ru.yandex.practicum.filmorate.enums.MpaRating;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -18,7 +20,7 @@ public class FilmController {
     private final FilmService filmService;
 
     @Autowired
-    public FilmController(InMemoryFilmStorage filmStorage) {
+    public FilmController(FilmDbStorage filmStorage) {
         this.filmService = new FilmService(filmStorage);
     }
 
@@ -34,10 +36,34 @@ public class FilmController {
         return filmService.getAllFilms();
     }
 
+    @GetMapping("/genres")
+    public List<Genres> getGenres() {
+        log.info("GET /genres");
+        return Genres.getNames();
+    }
+
+    @GetMapping("/mpa")
+    public List<MpaRating> getMpaRatings() {
+        log.info("GET /mpa");
+        return MpaRating.getNames();
+    }
+
     @GetMapping("/films/{id}")
     public Film getFilm(@PathVariable Long id) {
         log.info("GET /films/" + id);
         return filmService.getFilm(id);
+    }
+
+    @GetMapping("/genres/{id}")
+    public Genres getGenre(@PathVariable Long id) {
+        log.info("GET /genres/" + id);
+        return filmService.getGenreById(id);
+    }
+
+    @GetMapping("/mpa/{id}")
+    public MpaRating getMpaRating(@PathVariable Long id) {
+        log.info("GET /mpa" + id);
+        return filmService.getMpaById(id);
     }
 
     @GetMapping("/films/popular")

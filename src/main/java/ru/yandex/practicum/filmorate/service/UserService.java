@@ -25,18 +25,27 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public void addFriend(Long friend, Long user) {
-        checkUserId(friend);
-        checkUserId(user);
-        userStorage.getUser(user).addFriend(friend);
-        userStorage.getUser(friend).addFriend(user);
-        log.debug("Add" + user + " & " + friend);
+    public void addFriend(Long friendId, Long userId) {
+        checkUserId(friendId);
+        checkUserId(userId);
+        User user = userStorage.getUser(userId);
+        user.addFriend(friendId);
+        userStorage.updateUser(user);
+        User friend = userStorage.getUser(friendId);
+        user.addFriend(userId);
+        userStorage.updateUser(friend);
+        log.debug("Add" + userId + " & " + friendId);
     }
 
-    public void deleteFriend(Long friend, Long user) {
-        userStorage.getUser(user).getFriends().remove(friend);
-        userStorage.getUser(friend).getFriends().remove(user);
-        log.debug("Delete" + user + " & " + friend);
+    public void deleteFriend(Long friendId, Long userId) {
+        User user = userStorage.getUser(userId);
+        user.getFriends().remove(friendId);
+        userStorage.updateUser(user);
+        User friend = userStorage.getUser(friendId);
+        user.getFriends().remove(userId);
+        userStorage.updateUser(friend);
+        userStorage.deleteFriend(userId, friendId);
+        log.debug("Delete" + user + " & " + friendId);
     }
 
     public List<User> getFriends(Long userId) {
@@ -68,7 +77,7 @@ public class UserService {
         checkUserId(user.getId());
         if (checkUser(user)) {
             log.debug(user.toString());
-            userStorage.addUser(user);
+            userStorage.updateUser(user);
         }
         return user;
     }

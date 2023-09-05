@@ -5,17 +5,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.enums.Genres;
+import ru.yandex.practicum.filmorate.enums.MpaRating;
+import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class FilmService {
@@ -33,22 +32,64 @@ public class FilmService {
     public void addLike(Long id, Long userId) {
         checkFilmId(id);
         checkUserId(userId);
-        filmStorage.getFilm(id).addLike(userId);
+        Film film = filmStorage.getFilm(id);
+        film.addLike(userId);
+        filmStorage.updateFilm(film);
     }
 
     public void deleteLike(Long id, Long userId) {
         checkFilmId(id);
         checkUserId(userId);
-        filmStorage.getFilm(id).deleteLike(userId);
+        Film film = filmStorage.getFilm(id);
+        film.deleteLike(userId);
+        filmStorage.updateFilm(film);
     }
 
     public Film addFilm(Film film) {
         if (checkFilm(film)) {
+            if (Objects.nonNull(film.getGenres())) checkDuplicateGenre(film);
+            setGenreFromId(film);
+            setMpaFromId(film);
+            setLikesFromId(film);
             film.setId(getNextId());
             log.debug(film.toString());
             filmStorage.addFilm(film);
         }
         return film;
+    }
+
+    private void checkDuplicateGenre(Film film) {
+        Set<Genre> set = new LinkedHashSet<>(film.getGenres());
+        film.getGenres().clear();
+        film.getGenres().addAll(set);
+    }
+
+    private void setLikesFromId(Film film) {
+        Set<Long> likesSet = new HashSet<>();
+        if (Objects.nonNull(film.getLikes())) {
+            likesSet.addAll(film.getLikes());
+        }
+        film.setLikes(likesSet);
+    }
+
+    private void setGenreFromId(Film film) {
+        List<Genre> genreList = new ArrayList<>();
+        if (Objects.nonNull(film.getGenres())) {
+            for (Genre genre : film.getGenres()) {
+                genreList.add(Genre.getGenreById(genre.getId()));
+            }
+        }
+        film.setGenres(genreList);
+    }
+
+    private void setMpaFromId(Film film) {
+        int mpaId = film.getMpa().getId();
+        for (MpaRating mpaRating : MpaRating.values()) {
+            if (mpaRating.getId() == mpaId) {
+                film.getMpa().setId(mpaRating.getId());
+                film.getMpa().setName(mpaRating.getName());
+            }
+        }
     }
 
     public List<Film> getAllFilms() {
@@ -64,9 +105,13 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         checkFilmId(film.getId());
+        if (Objects.nonNull(film.getGenres())) checkDuplicateGenre(film);
+        setGenreFromId(film);
+        setMpaFromId(film);
+        setLikesFromId(film);
         if (checkFilm(film)) {
             log.debug(film.toString());
-            filmStorage.addFilm(film);
+            filmStorage.updateFilm(film);
         }
         return film;
     }
@@ -102,6 +147,28 @@ public class FilmService {
 
     private Long getNextId() {
         return ++id;
+    }
+
+    public Genres getGenreById(Long id) {
+        checkGenre(id);
+        for (Genres g : Genres.values())
+            if (g.getId() == id) return g;
+        return Genres.NoGenre;
+    }
+
+    private void checkGenre(Long id) {
+        if (Genres.values().length <= id) throw new GenreNotFoundException(id);
+    }
+
+    public MpaRating getMpaById(Long id) {
+        checkMpa(id);
+        for (MpaRating mpaRating : MpaRating.values())
+            if (mpaRating.getId() == id) return mpaRating;
+        return MpaRating.PG;
+    }
+
+    private void checkMpa(Long id) {
+        if (MpaRating.values().length <= id) throw new MpaNotFoundException(id);
     }
 
 }
