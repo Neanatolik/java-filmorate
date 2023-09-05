@@ -5,8 +5,8 @@ import ru.yandex.practicum.filmorate.enums.Genres;
 
 @Data
 public class Genre {
-    int id;
-    String name;
+    private int id;
+    private String name;
 
     public Genre() {
     }

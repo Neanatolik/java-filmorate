@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -18,16 +21,18 @@ import java.util.Map;
 @Component
 @Primary
 public class FilmDbStorage implements FilmStorage {
-    final String ADD_FILM = "MERGE INTO FILMS (id, name, description, release_date, duration, mpa) values (?, ?, ?, ?, ?, ?);";
-    final String ADD_GENRE = "INSERT INTO FILMS_GENRE (film_id, genre_id) values (?,?)";
-    final String ADD_LIKE = "MERGE INTO LIKES (film_id, user_id) " + "KEY(film_id, user_id) values (?,?)";
-    final String DELETE_LIKES = "DELETE FROM LIKES WHERE film_id = ?;";
-    final String GET_GENRES = "SELECT * FROM FILMS_GENRE WHERE film_id = ?";
-    final String UPDATE_FILM = "UPDATE FILMS SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE id = ?";
-    final String DELETE_GENRES = "DELETE FROM FILMS_GENRE WHERE film_id = ?;";
-    final String GET_FILM = "SELECT * FROM FILMS WHERE id = ?";
-    final String GET_FILMS = "SELECT * FROM FILMS";
-    final String GET_LIKES = "SELECT * FROM LIKES WHERE film_id = ?";
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
+    private final String ADDFILM = "MERGE INTO FILMS (id, name, description, release_date, duration, mpa) values (?, ?, ?, ?, ?, ?);";
+    private final String ADDGENRE = "INSERT INTO FILMS_GENRE (film_id, genre_id) values (?,?)";
+    private final String ADDLIKE = "MERGE INTO LIKES (film_id, user_id) " + "KEY(film_id, user_id) values (?,?)";
+    private final String DELETELIKES = "DELETE FROM LIKES WHERE film_id = ?;";
+    private final String GETGENRES = "SELECT * FROM FILMS_GENRE WHERE film_id = ?";
+    private final String UPDATEFILM = "UPDATE FILMS SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE id = ?";
+    private final String DELETEGENRES = "DELETE FROM FILMS_GENRE WHERE film_id = ?;";
+    private final String GETFILM = "SELECT * FROM FILMS WHERE id = ?";
+    private final String GETFILMS = "SELECT * FROM FILMS";
+    private final String GETLIKES = "SELECT * FROM LIKES WHERE film_id = ?";
     private final JdbcTemplate jdbcTemplate;
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
@@ -36,41 +41,43 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        jdbcTemplate.update(ADD_FILM, film.getId(), film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
+        jdbcTemplate.update(ADDFILM, film.getId(), film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(ADD_GENRE, film.getId(), genre.getId());
+            jdbcTemplate.update(ADDGENRE, film.getId(), genre.getId());
         }
         for (Long id : film.getLikes()) {
-            jdbcTemplate.update(ADD_LIKE, film.getId(), id);
+            jdbcTemplate.update(ADDLIKE, film.getId(), id);
         }
+        log.debug(film.toString());
         return film;
     }
 
     @Override
     public List<Film> getAllFilms() {
-        return jdbcTemplate.query(GET_FILMS, ((rs, rowNum) -> {
+        return jdbcTemplate.query(GETFILMS, ((rs, rowNum) -> {
             return makeFilm(rs);
         }));
     }
 
     @Override
     public Film getFilm(Long id) {
-        return jdbcTemplate.queryForObject(GET_FILM, (rs, rowNum) -> {
+        return jdbcTemplate.queryForObject(GETFILM, (rs, rowNum) -> {
             return makeFilm(rs);
         }, id);
     }
 
     @Override
     public Film updateFilm(Film film) {
-        jdbcTemplate.update(UPDATE_FILM, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
-        jdbcTemplate.update(DELETE_GENRES, film.getId());
+        jdbcTemplate.update(UPDATEFILM, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
+        jdbcTemplate.update(DELETEGENRES, film.getId());
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(ADD_GENRE, film.getId(), genre.getId());
+            jdbcTemplate.update(ADDGENRE, film.getId(), genre.getId());
         }
-        jdbcTemplate.update(DELETE_LIKES, film.getId());
+        jdbcTemplate.update(DELETELIKES, film.getId());
         for (Long id : film.getLikes()) {
-            jdbcTemplate.update(ADD_LIKE, film.getId(), id);
+            jdbcTemplate.update(ADDLIKE, film.getId(), id);
         }
+        log.debug(film.toString());
         return film;
     }
 
@@ -80,11 +87,12 @@ public class FilmDbStorage implements FilmStorage {
         for (Film film : getAllFilms()) {
             users.put(film.getId(), film);
         }
+        log.debug(users.toString());
         return users;
     }
 
     private List<Long> makeListOfLikes(Long idFilm) {
-        return jdbcTemplate.query(GET_LIKES, ((rs, rowNum) -> rs.getLong("user_id")), idFilm);
+        return jdbcTemplate.query(GETLIKES, ((rs, rowNum) -> rs.getLong("user_id")), idFilm);
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
@@ -100,7 +108,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private List<Genre> makeGenreList(Long idFilm) {
-        List<Genre> genreList = jdbcTemplate.query(GET_GENRES, ((rs, rowNum) -> {
+        List<Genre> genreList = jdbcTemplate.query(GETGENRES, ((rs, rowNum) -> {
             return makeGenre(rs);
         }), idFilm);
         return genreList;

@@ -19,14 +19,14 @@ import java.util.Map;
 @Primary
 public class UserDbStorage implements UserStorage {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
-    final String ADD_USER = "MERGE INTO USERS (id, name, login, email, birthday) values (?,?,?,?,?)";
-    final String ADD_USER_FRIENDS = "MERGE INTO FRIENDS (request_user_id, response_user_id) " +
+    private final String ADDUSER = "MERGE INTO USERS (id, name, login, email, birthday) values (?,?,?,?,?)";
+    private final String ADDUSERFRIENDS = "MERGE INTO FRIENDS (request_user_id, response_user_id) " +
             "KEY(request_user_id, response_user_id) values (?,?)";
-    final String UPDATE_USER = "UPDATE USERS SET name = ?, login = ?, email = ?, birthday = ? WHERE id = ?";
-    final String GET_USER = "SELECT * FROM USERS WHERE id = ?";
-    final String GET_USERS = "SELECT * FROM USERS";
-    final String GET_FRIENDS = "SELECT response_user_id FROM FRIENDS WHERE request_user_id = ?";
-    final String DELETE_FRIEND = "DELETE FROM FRIENDS WHERE request_user_id = ? AND response_user_id = ?";
+    private final String UPDATEUSER = "UPDATE USERS SET name = ?, login = ?, email = ?, birthday = ? WHERE id = ?";
+    private final String GETUSER = "SELECT * FROM USERS WHERE id = ?";
+    private final String GETUSERS = "SELECT * FROM USERS";
+    private final String GETFRIENDS = "SELECT response_user_id FROM FRIENDS WHERE request_user_id = ?";
+    private final String DELETEFRIEND = "DELETE FROM FRIENDS WHERE request_user_id = ? AND response_user_id = ?";
     private JdbcTemplate jdbcTemplate;
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
@@ -35,24 +35,27 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        jdbcTemplate.update(ADD_USER, user.getId(), user.getName(), user.getLogin(), user.getEmail(), user.getBirthday());
+        jdbcTemplate.update(ADDUSER, user.getId(), user.getName(), user.getLogin(), user.getEmail(), user.getBirthday());
         for (Long id : user.getFriends()) {
-            jdbcTemplate.update(ADD_USER_FRIENDS, user.getId(), id);
+            jdbcTemplate.update(ADDUSERFRIENDS, user.getId(), id);
         }
+        log.debug(user.toString());
         return user;
     }
 
     @Override
     public List<User> getAllUsers() {
-        List<User> users = jdbcTemplate.query(GET_USERS, ((rs, rowNum) -> {
+        List<User> users = jdbcTemplate.query(GETUSERS, ((rs, rowNum) -> {
             return makeUser(rs);
         }));
+        log.debug(users.toString());
         return users;
     }
 
     @Override
     public User getUser(Long id) {
-        return jdbcTemplate.queryForObject(GET_USER, (rs, rowNum) -> {
+        log.debug(id.toString());
+        return jdbcTemplate.queryForObject(GETUSER, (rs, rowNum) -> {
             return makeUser(rs);
         }, id);
     }
@@ -63,24 +66,27 @@ public class UserDbStorage implements UserStorage {
         for (User user : getAllUsers()) {
             users.put(user.getId(), user);
         }
+        log.debug(users.toString());
         return users;
     }
 
     @Override
     public User updateUser(User user) {
-        jdbcTemplate.update(UPDATE_USER, user.getName(), user.getLogin(), user.getEmail(), user.getBirthday(), user.getId());
+        jdbcTemplate.update(UPDATEUSER, user.getName(), user.getLogin(), user.getEmail(), user.getBirthday(), user.getId());
         for (Long id : user.getFriends())
-            jdbcTemplate.update(ADD_USER_FRIENDS, user.getId(), id);
+            jdbcTemplate.update(ADDUSERFRIENDS, user.getId(), id);
+        log.debug(user.toString());
         return user;
     }
 
     @Override
     public void deleteFriend(Long userId, Long friendId) {
-        jdbcTemplate.update(DELETE_FRIEND, userId, friendId);
+        jdbcTemplate.update(DELETEFRIEND, userId, friendId);
+        log.debug(userId.toString(), friendId.toString());
     }
 
     private List<Long> getFriends(Long id) {
-        return jdbcTemplate.query(GET_FRIENDS, ((rs, rowNum) -> {
+        return jdbcTemplate.query(GETFRIENDS, ((rs, rowNum) -> {
             return rs.getLong("response_user_id");
         }), id);
     }

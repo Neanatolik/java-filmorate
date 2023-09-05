@@ -5,8 +5,8 @@ import ru.yandex.practicum.filmorate.enums.MpaRating;
 
 @Data
 public class Mpa {
-    int id;
-    String name;
+    private int id;
+    private String name;
 
     public Mpa() {
         this.id = 6;
