@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
 public class GenreNotFoundException extends RuntimeException {
-    private final Long parameter;
+    private final Integer parameter;
 
-    public GenreNotFoundException(Long parameter) {
+    public GenreNotFoundException(int parameter) {
         this.parameter = parameter;
     }
 

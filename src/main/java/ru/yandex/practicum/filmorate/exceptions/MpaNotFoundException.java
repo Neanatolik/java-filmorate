@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
 public class MpaNotFoundException extends RuntimeException {
-    private final Long parameter;
+    private final Integer parameter;
 
-    public MpaNotFoundException(Long parameter) {
+    public MpaNotFoundException(Integer parameter) {
         this.parameter = parameter;
     }
 

@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NonNull;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 @Data
 public class Film {
@@ -24,31 +24,32 @@ public class Film {
     @Positive
     @NonNull
     private int duration;
-    private List<Genre> genres;
+    private Integer rate;
+    private LinkedHashSet<Genres> genres;
     @NonNull
     private Mpa mpa;
-    @JsonIgnore
-    private Set<Long> likes;
 
-    public Film(String name, String description, LocalDate releaseDate, int duration, Mpa mpa, List<Genre> genres, Set<Long> likes) {
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, Integer rate, Mpa mpa, LinkedHashSet<Genres> genres) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.rate = rate;
         this.mpa = mpa;
         this.genres = genres;
-        this.likes = likes;
     }
 
-    public void addLike(Long id) {
-        likes.add(id);
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("name", name);
+        values.put("description", description);
+        values.put("release_date", releaseDate);
+        values.put("duration", duration);
+        values.put("rate", rate);
+        values.put("mpa", mpa.getId());
+        values.put("genres", genres);
+        return values;
     }
 
-    public void deleteLike(Long id) {
-        likes.remove(id);
-    }
-
-    public int getAmountOfLikes() {
-        return likes.size();
-    }
 }
