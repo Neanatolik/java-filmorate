@@ -5,10 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
@@ -45,34 +46,22 @@ public class FilmService {
     public Film addFilm(Film film) {
         if (checkFilm(film)) {
             setGenreFromId(film);
-            setMpaFromId(film);
-            setRate(film);
             log.debug(film.toString());
             filmStorage.addFilm(film);
         }
         return film;
     }
 
-    private void setRate(Film film) {
-        if (Objects.isNull(film.getRate())) film.setRate(0);
-    }
-
     private void setGenreFromId(Film film) {
         LinkedHashSet<Genres> genresSet = new LinkedHashSet<>();
         if (Objects.nonNull(film.getGenres())) {
-            for (Genres genres : film.getGenres()) {
-                genresSet.add(getGenreById(genres.getId()));
-            }
+            genresSet = film.getGenres();
         }
         film.setGenres(genresSet);
     }
 
-    private void setMpaFromId(Film film) {
-        film.setMpa(filmStorage.getMpa(film.getMpa().getId()));
-    }
-
     public List<Film> getAllFilms() {
-        return new ArrayList<>(filmStorage.getAllFilms());
+        return new ArrayList<>(filmStorage.getFilms());
     }
 
     public Film getFilm(Long id) {
@@ -84,8 +73,6 @@ public class FilmService {
     public Film updateFilm(Film film) {
         checkFilmId(film.getId());
         setGenreFromId(film);
-        setMpaFromId(film);
-        setRate(film);
         if (checkFilm(film)) {
             log.debug(film.toString());
             filmStorage.updateFilm(film);
@@ -94,7 +81,7 @@ public class FilmService {
     }
 
     public List<Film> getPopular(int count) {
-        if (count > filmStorage.getAllFilms().size()) count = filmStorage.getAllFilms().size();
+        if (count > filmStorage.getFilms().size()) count = filmStorage.getFilms().size();
         return filmStorage.getPopular(count).subList(0, count);
     }
 
@@ -118,29 +105,4 @@ public class FilmService {
         } else return true;
     }
 
-    public Genres getGenreById(int id) {
-        checkGenre(id);
-        return filmStorage.getGenre(id);
-    }
-
-    private void checkGenre(int id) {
-        if (filmStorage.amountOfGenres() < id) throw new GenreNotFoundException(id);
-    }
-
-    public Mpa getMpaById(int id) {
-        checkMpa(id);
-        return filmStorage.getMpa(id);
-    }
-
-    private void checkMpa(int id) {
-        if (filmStorage.amountOfMpas() < id) throw new MpaNotFoundException(id);
-    }
-
-    public List<Genres> getGenres() {
-        return filmStorage.getGenres();
-    }
-
-    public List<Mpa> getMpas() {
-        return filmStorage.getMpas();
-    }
 }

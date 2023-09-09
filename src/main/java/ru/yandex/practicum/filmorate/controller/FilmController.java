@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genres;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 
@@ -36,34 +34,10 @@ public class FilmController {
         return filmService.getAllFilms();
     }
 
-    @GetMapping("/genres")
-    public List<Genres> getGenres() {
-        log.info("GET /genres");
-        return filmService.getGenres();
-    }
-
-    @GetMapping("/mpa")
-    public List<Mpa> getMpaRatings() {
-        log.info("GET /mpa");
-        return filmService.getMpas();
-    }
-
     @GetMapping("/films/{id}")
     public Film getFilm(@PathVariable Long id) {
         log.info("GET /films/" + id);
         return filmService.getFilm(id);
-    }
-
-    @GetMapping("/genres/{id}")
-    public Genres getGenre(@PathVariable Integer id) {
-        log.info("GET /genres/" + id);
-        return filmService.getGenreById(id);
-    }
-
-    @GetMapping("/mpa/{id}")
-    public Mpa getMpaRating(@PathVariable int id) {
-        log.info("GET /mpa" + id);
-        return filmService.getMpaById(id);
     }
 
     @GetMapping("/films/popular")

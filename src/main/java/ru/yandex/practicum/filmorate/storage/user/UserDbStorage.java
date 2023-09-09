@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-@Primary
 public class UserDbStorage implements UserStorage {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private JdbcTemplate jdbcTemplate;
