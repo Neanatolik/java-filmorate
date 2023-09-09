@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.storage.genres.GenresStorage;
-import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.util.List;
 
@@ -21,6 +20,7 @@ public class GenresService {
     public GenresService(GenresStorage genresStorage) {
         this.genresStorage = genresStorage;
     }
+
     public Genres getGenreById(int id) {
         checkGenre(id);
         log.debug(Integer.toString(id));
