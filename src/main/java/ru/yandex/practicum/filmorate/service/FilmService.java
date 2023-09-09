@@ -9,13 +9,15 @@ import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class FilmService {
@@ -23,37 +25,43 @@ public class FilmService {
     private static final LocalDate minDate = LocalDate.of(1895, Month.DECEMBER, 28);
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
     private final FilmStorage filmStorage;
-    private Long id = 0L;
 
     @Autowired
     public FilmService(FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
-    public void addLike(Long id, Long userId) {
-        checkFilmId(id);
+    public void addLike(Long filmId, Long userId) {
+        checkFilmId(filmId);
         checkUserId(userId);
-        filmStorage.getFilm(id).addLike(userId);
+        filmStorage.addLike(filmId, userId);
     }
 
-    public void deleteLike(Long id, Long userId) {
-        checkFilmId(id);
+    public void deleteLike(Long filmId, Long userId) {
+        checkFilmId(filmId);
         checkUserId(userId);
-        filmStorage.getFilm(id).deleteLike(userId);
+        filmStorage.deleteLike(filmId, userId);
     }
 
     public Film addFilm(Film film) {
         if (checkFilm(film)) {
-            film.setId(getNextId());
+            setGenreFromId(film);
             log.debug(film.toString());
             filmStorage.addFilm(film);
         }
         return film;
     }
 
+    private void setGenreFromId(Film film) {
+        LinkedHashSet<Genres> genresSet = new LinkedHashSet<>();
+        if (Objects.nonNull(film.getGenres())) {
+            genresSet = film.getGenres();
+        }
+        film.setGenres(genresSet);
+    }
+
     public List<Film> getAllFilms() {
-        log.debug(filmStorage.getFilms().toString());
-        return new ArrayList<>(filmStorage.getFilms().values());
+        return new ArrayList<>(filmStorage.getFilms());
     }
 
     public Film getFilm(Long id) {
@@ -64,24 +72,21 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         checkFilmId(film.getId());
+        setGenreFromId(film);
         if (checkFilm(film)) {
             log.debug(film.toString());
-            filmStorage.addFilm(film);
+            filmStorage.updateFilm(film);
         }
         return film;
     }
 
     public List<Film> getPopular(int count) {
-        if (filmStorage.getFilms().size() < count) count = filmStorage.getFilms().size();
-        List<Film> popularFilms = new LinkedList<>(filmStorage.getAllFilms());
-        popularFilms.sort((Film film1, Film film2) -> {
-            return Integer.compare(film2.getAmountOfLikes(), film1.getAmountOfLikes());
-        });
-        return popularFilms.subList(0, count);
+        if (count > filmStorage.getFilms().size()) count = filmStorage.getFilms().size();
+        return filmStorage.getPopular(count).subList(0, count);
     }
 
     private void checkFilmId(Long id) {
-        if (!filmStorage.getFilms().containsKey(id)) throw new FilmNotFoundException(id);
+        if (!filmStorage.getFilmsId().contains(id)) throw new FilmNotFoundException(id);
     }
 
     private void checkUserId(Long id) {
@@ -98,10 +103,6 @@ public class FilmService {
         } else if (film.getDuration() <= 0) {
             throw new ValidationException("Длительность фильма должна быть положительной");
         } else return true;
-    }
-
-    private Long getNextId() {
-        return ++id;
     }
 
 }

@@ -18,40 +18,31 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserStorage userStorage;
-    private Long nextId = 0L;
 
     @Autowired
     public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
-    public void addFriend(Long friend, Long user) {
-        checkUserId(friend);
-        checkUserId(user);
-        userStorage.getUser(user).addFriend(friend);
-        userStorage.getUser(friend).addFriend(user);
-        log.debug("Add" + user + " & " + friend);
+    public void addFriend(Long userId, Long friendId) {
+        checkUserId(friendId);
+        checkUserId(userId);
+        userStorage.addFriend(userId, friendId);
+        log.debug("Add" + userId + " & " + friendId);
     }
 
-    public void deleteFriend(Long friend, Long user) {
-        userStorage.getUser(user).getFriends().remove(friend);
-        userStorage.getUser(friend).getFriends().remove(user);
-        log.debug("Delete" + user + " & " + friend);
+    public void deleteFriend(Long userId, Long friendId) {
+        userStorage.deleteFriend(userId, friendId);
+        log.debug("Delete" + userId + " & " + friendId);
     }
 
     public List<User> getFriends(Long userId) {
-        List<User> users = new ArrayList<>();
-        for (Long l : userStorage.getUser(userId).getFriends()) {
-            users.add(userStorage.getUser(l));
-        }
-        log.debug(users.toString());
-        return users;
+        return userStorage.getFriends(userId);
     }
 
     public User addUser(User user) {
         checkUserName(user);
         if (checkUser(user)) {
-            user.setId(getNextId());
             log.debug(user.toString());
             userStorage.addUser(user);
         }
@@ -68,7 +59,7 @@ public class UserService {
         checkUserId(user.getId());
         if (checkUser(user)) {
             log.debug(user.toString());
-            userStorage.addUser(user);
+            userStorage.updateUser(user);
         }
         return user;
     }
@@ -80,7 +71,7 @@ public class UserService {
     }
 
     private void checkUserId(Long id) {
-        if (!userStorage.getUsers().containsKey(id)) throw new UserNotFoundException(id);
+        if (!userStorage.getUsersId().contains(id)) throw new UserNotFoundException(id);
     }
 
     private void checkUserName(User user) {
@@ -89,8 +80,8 @@ public class UserService {
 
     public List<User> getCommon(Long otherId, Long id) {
         List<User> users = new ArrayList<>();
-        Set<Long> s1 = new HashSet<>(userStorage.getUser(id).getFriends());
-        Set<Long> s2 = new HashSet<>(userStorage.getUser(otherId).getFriends());
+        Set<Long> s1 = new HashSet<>(userStorage.getFriendsId(otherId));
+        Set<Long> s2 = new HashSet<>(userStorage.getFriendsId(id));
         s1.retainAll(s2);
         for (Long l : s1) {
             users.add(userStorage.getUser(l));
@@ -107,9 +98,4 @@ public class UserService {
             throw new ValidationException("Логин не может быть пустым");
         } else return true;
     }
-
-    private Long getNextId() {
-        return ++nextId;
-    }
-
 }
